@@ -43,6 +43,10 @@ impl Map {
             Some(value) => Some(Arc::clone(value)),
         };
     }
+
+    fn remove(&mut self, key: &Vec<u8>) {
+        self.map.remove(key);
+    }
 }
 
 #[no_mangle]
@@ -83,7 +87,7 @@ pub extern "system" fn Java_HelloWorld_mapSize(
 }
 
 #[no_mangle]
-pub  extern "system" fn Java_HelloWorld_getFromMap(
+pub extern "system" fn Java_HelloWorld_getFromMap(
     env: JNIEnv,
     _class: JClass,
     map_ptr: jlong,
@@ -117,4 +121,18 @@ pub  extern "system" fn Java_HelloWorld_getFromMap(
             );
         }
     }
+}
+
+#[no_mangle]
+pub extern "system" fn Java_HelloWorld_deleteFromMap(
+    env: JNIEnv,
+    _class: JClass,
+    map_ptr: jlong,
+    key_byte_array: jbyteArray,
+) {
+    let map = unsafe { &mut *(map_ptr as *mut Map) };
+
+    let key = env.convert_byte_array(key_byte_array).unwrap();
+
+    map.remove(&key);
 }

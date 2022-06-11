@@ -47,6 +47,14 @@ JNIEXPORT void JNICALL Java_HelloWorld_putIntoMap
 JNIEXPORT void JNICALL Java_HelloWorld_getFromMap
   (JNIEnv *, jclass, jlong, jbyteArray, jobject);
 
+/*
+ * Class:     HelloWorld
+ * Method:    deleteFromMap
+ * Signature: (J[B)V
+ */
+JNIEXPORT void JNICALL Java_HelloWorld_deleteFromMap
+  (JNIEnv *, jclass, jlong, jbyteArray);
+
 #ifdef __cplusplus
 }
 #endif

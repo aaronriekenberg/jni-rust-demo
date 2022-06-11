@@ -10,13 +10,11 @@ class HelloWorld {
 
     private static native long mapSize(long map);
 
-    // private static native java.nio.ByteBuffer allocateBuffer(int size);
-
-    // private static native void freeBuffer(java.nio.ByteBuffer buffer);
-
     private static native void putIntoMap(long map, byte[] key, byte[] value);
 
     private static native void getFromMap(long map, byte[] key, MapGetter getter);
+
+    private static native void deleteFromMap(long map, byte[] key);
 
     static {
         System.loadLibrary("mylib");
@@ -84,6 +82,9 @@ class HelloWorld {
             }
         );
 
+        deleteFromMap(map, key);
+
+        System.out.println("map size after delete = " + mapSize(map));
 
         deleteMap(map);
     }
