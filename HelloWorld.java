@@ -44,8 +44,7 @@ class HelloWorld {
 
         System.out.println("map size after put = " + mapSize(map));
 
-        getFromMap(map, key, new MapGetter() {
-            public void read(java.nio.ByteBuffer buffer) {
+        getFromMap(map, key, (java.nio.ByteBuffer buffer) -> {
                 System.out.println("in read, buffer.isDirect() = " + buffer.isDirect());
                 System.out.println("in read, buffer.getCapacity() = " + buffer.capacity());
                 System.out.println("in read, buffer.limit() = " + buffer.limit());
@@ -54,7 +53,7 @@ class HelloWorld {
                     System.out.println("get = " + buffer.get());
                 }
             }
-        });
+        );
 
         deleteMap(map);
     }
