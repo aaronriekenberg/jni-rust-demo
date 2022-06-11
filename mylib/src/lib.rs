@@ -46,47 +46,24 @@ impl Map {
 }
 
 #[no_mangle]
-pub unsafe extern "system" fn Java_HelloWorld_newMap(_env: JNIEnv, _class: JClass) -> jlong {
+pub extern "system" fn Java_HelloWorld_newMap(_env: JNIEnv, _class: JClass) -> jlong {
     Box::into_raw(Box::new(Map::new())) as jlong
 }
 
 #[no_mangle]
-pub unsafe extern "system" fn Java_HelloWorld_deleteMap(
-    _env: JNIEnv,
-    _class: JClass,
-    map_ptr: jlong,
-) {
-    let _boxed_counter = Box::from_raw(map_ptr as *mut Map);
+pub extern "system" fn Java_HelloWorld_deleteMap(_env: JNIEnv, _class: JClass, map_ptr: jlong) {
+    let _boxed_counter = unsafe { Box::from_raw(map_ptr as *mut Map) };
 }
 
-// #[no_mangle]
-// pub unsafe extern "system" fn Java_HelloWorld_allocateBuffer(
-//     env: JNIEnv,
-//     _class: JClass,
-//     size: jint,
-// ) -> jobject {
-//     let unsigned_size = usize::try_from(size).unwrap();
-
-//     let mut buffer: Vec<u8> = Vec::new();
-//     buffer.resize(unsigned_size, 0u8);
-//     // Prevent running `buffer`'s destructor so we are in complete control
-//     // of the allocation.
-//     let mut buffer = std::mem::ManuallyDrop::new(buffer);
-
-//     let result = env.new_direct_byte_buffer(buffer.as_mut_slice()).unwrap();
-
-//     return result.into_inner();
-// }
-
 #[no_mangle]
-pub unsafe extern "system" fn Java_HelloWorld_putIntoMap(
+pub extern "system" fn Java_HelloWorld_putIntoMap(
     env: JNIEnv,
     _class: JClass,
     map_ptr: jlong,
     key_byte_array: jbyteArray,
     value_byte_array: jbyteArray,
 ) {
-    let map = &mut *(map_ptr as *mut Map);
+    let map = unsafe { &mut *(map_ptr as *mut Map) };
 
     let key = env.convert_byte_array(key_byte_array).unwrap();
     let value = Arc::new(env.convert_byte_array(value_byte_array).unwrap());
@@ -95,25 +72,25 @@ pub unsafe extern "system" fn Java_HelloWorld_putIntoMap(
 }
 
 #[no_mangle]
-pub unsafe extern "system" fn Java_HelloWorld_mapSize(
+pub extern "system" fn Java_HelloWorld_mapSize(
     _env: JNIEnv,
     _class: JClass,
     map_ptr: jlong,
 ) -> jlong {
-    let map = &mut *(map_ptr as *mut Map);
+    let map = unsafe { &mut *(map_ptr as *mut Map) };
 
     return map.len() as jlong;
 }
 
 #[no_mangle]
-pub unsafe extern "system" fn Java_HelloWorld_getFromMap(
+pub  extern "system" fn Java_HelloWorld_getFromMap(
     env: JNIEnv,
     _class: JClass,
     map_ptr: jlong,
     key_byte_array: jbyteArray,
     map_getter: JObject,
 ) {
-    let map = &mut *(map_ptr as *mut Map);
+    let map = unsafe { &mut *(map_ptr as *mut Map) };
 
     let key = env.convert_byte_array(key_byte_array).unwrap();
 

@@ -44,6 +44,8 @@ class HelloWorld {
 
         System.out.println("map size after put = " + mapSize(map));
 
+        System.out.println("before get(key)");
+
         getFromMap(map, key, (java.nio.ByteBuffer buffer) -> {
                 System.out.println("in read, buffer.isDirect() = " + buffer.isDirect());
                 System.out.println("in read, buffer.getCapacity() = " + buffer.capacity());
@@ -54,6 +56,34 @@ class HelloWorld {
                 }
             }
         );
+
+        System.out.println("before get(key)");
+
+        getFromMap(map, key, (java.nio.ByteBuffer buffer) -> {
+                System.out.println("in read, buffer.isDirect() = " + buffer.isDirect());
+                System.out.println("in read, buffer.getCapacity() = " + buffer.capacity());
+                System.out.println("in read, buffer.limit() = " + buffer.limit());
+
+                for (int i = 0; i < buffer.limit(); ++i){
+                    System.out.println("get = " + buffer.get());
+                }
+            }
+        );
+
+        System.out.println("before get(key2)");
+
+        final byte[] key2 = { 0, 0, 0, 0 };
+        getFromMap(map, key2, (java.nio.ByteBuffer buffer) -> {
+                System.out.println("in read, buffer.isDirect() = " + buffer.isDirect());
+                System.out.println("in read, buffer.getCapacity() = " + buffer.capacity());
+                System.out.println("in read, buffer.limit() = " + buffer.limit());
+
+                for (int i = 0; i < buffer.limit(); ++i){
+                    System.out.println("get = " + buffer.get());
+                }
+            }
+        );
+
 
         deleteMap(map);
     }
