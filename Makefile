@@ -1,5 +1,5 @@
 java_run: lib
-	javac -h . HelloWorld.java && java -Djava.library.path=mylib/target/debug/ HelloWorld
+	javac -h . *.java && java -Djava.library.path=mylib/target/debug/ HelloWorld
 
 .PHONY: lib
 
