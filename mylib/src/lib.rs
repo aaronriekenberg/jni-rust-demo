@@ -76,11 +76,7 @@ pub extern "system" fn Java_RustMap_putIntoMap(
 }
 
 #[no_mangle]
-pub extern "system" fn Java_RustMap_mapSize(
-    _env: JNIEnv,
-    _class: JClass,
-    map_ptr: jlong,
-) -> jlong {
+pub extern "system" fn Java_RustMap_mapSize(_env: JNIEnv, _class: JClass, map_ptr: jlong) -> jlong {
     let map = unsafe { &mut *(map_ptr as *mut Map) };
 
     return map.len() as jlong;
