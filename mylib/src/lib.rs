@@ -50,17 +50,17 @@ impl Map {
 }
 
 #[no_mangle]
-pub extern "system" fn Java_HelloWorld_newMap(_env: JNIEnv, _class: JClass) -> jlong {
+pub extern "system" fn Java_RustMap_newMap(_env: JNIEnv, _class: JClass) -> jlong {
     Box::into_raw(Box::new(Map::new())) as jlong
 }
 
 #[no_mangle]
-pub extern "system" fn Java_HelloWorld_deleteMap(_env: JNIEnv, _class: JClass, map_ptr: jlong) {
+pub extern "system" fn Java_RustMap_deleteMap(_env: JNIEnv, _class: JClass, map_ptr: jlong) {
     let _boxed_counter = unsafe { Box::from_raw(map_ptr as *mut Map) };
 }
 
 #[no_mangle]
-pub extern "system" fn Java_HelloWorld_putIntoMap(
+pub extern "system" fn Java_RustMap_putIntoMap(
     env: JNIEnv,
     _class: JClass,
     map_ptr: jlong,
@@ -76,7 +76,7 @@ pub extern "system" fn Java_HelloWorld_putIntoMap(
 }
 
 #[no_mangle]
-pub extern "system" fn Java_HelloWorld_mapSize(
+pub extern "system" fn Java_RustMap_mapSize(
     _env: JNIEnv,
     _class: JClass,
     map_ptr: jlong,
@@ -87,7 +87,7 @@ pub extern "system" fn Java_HelloWorld_mapSize(
 }
 
 #[no_mangle]
-pub extern "system" fn Java_HelloWorld_getFromMap(
+pub extern "system" fn Java_RustMap_getFromMap(
     env: JNIEnv,
     _class: JClass,
     map_ptr: jlong,
@@ -124,7 +124,7 @@ pub extern "system" fn Java_HelloWorld_getFromMap(
 }
 
 #[no_mangle]
-pub extern "system" fn Java_HelloWorld_deleteFromMap(
+pub extern "system" fn Java_RustMap_deleteFromMap(
     env: JNIEnv,
     _class: JClass,
     map_ptr: jlong,

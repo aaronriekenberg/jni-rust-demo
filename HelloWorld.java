@@ -2,7 +2,11 @@ interface MapGetter {
     void read(java.nio.ByteBuffer buffer);
 }
 
-class HelloWorld {
+class RustMap {
+
+   static {
+        System.loadLibrary("mylib");
+    }
 
     private static native long newMap();
 
@@ -16,35 +20,58 @@ class HelloWorld {
 
     private static native void deleteFromMap(long map, byte[] key);
 
-    static {
-        System.loadLibrary("mylib");
+    private long map;
+
+    public RustMap() {
+        this.map = newMap();
     }
 
-    public static void main(String[] args) {
+    public void destroy() {
+        if (this.map != 0) {
+            deleteMap(this.map);
+            this.map = 0;
+        }
+    }
 
-        final long map = newMap();
-        System.out.println("map = " + map);
+    public void put(byte[] key, byte[] value) {
+        putIntoMap(this.map, key, value);
+    }
 
-        // final java.nio.ByteBuffer byteBuffer = allocateBuffer(2048);
+    public void get(byte[] key, MapGetter getter) {
+        getFromMap(this.map, key, getter);
+    }
 
-        // System.out.println("byteBuffer.isDirect = " + byteBuffer.isDirect());
-        // System.out.println("byteBuffer.capacity = " + byteBuffer.capacity());
+    public long size() {
+        return mapSize(this.map);
+    }
 
-        // freeBuffer(byteBuffer);
+    public void delete(byte[] key) {
+        deleteFromMap(this.map, key);
+    }
 
-        System.out.println("map size before put = " + mapSize(map));
+}
+
+class HelloWorld {
+
+    private final RustMap rustMap = new RustMap();
+
+    public void run() {
+
+        System.out.println("rustMap size before put = " + rustMap.size());
 
         final byte[] key = { 0, 1, 2, 3};
 
         final byte[] value = {1,2,3,4,5};
 
-        putIntoMap(map, key, value);
+        rustMap.put(key, value);
 
-        System.out.println("map size after put = " + mapSize(map));
+        System.out.println("map size after put = " + rustMap.size());
 
         System.out.println("before get(key)");
 
-        getFromMap(map, key, (java.nio.ByteBuffer buffer) -> {
+        long startNano = System.nanoTime();
+
+        rustMap.get(key, (java.nio.ByteBuffer buffer) -> {
                 System.out.println("in read, buffer.isDirect() = " + buffer.isDirect());
                 System.out.println("in read, buffer.getCapacity() = " + buffer.capacity());
                 System.out.println("in read, buffer.limit() = " + buffer.limit());
@@ -54,10 +81,14 @@ class HelloWorld {
                 }
             }
         );
+    
+        long deltaNano = System.nanoTime() - startNano;
+
+        System.out.println("deltaNano = " + deltaNano);
 
         System.out.println("before get(key)");
 
-        getFromMap(map, key, (java.nio.ByteBuffer buffer) -> {
+        rustMap.get(key, (java.nio.ByteBuffer buffer) -> {
                 System.out.println("in read, buffer.isDirect() = " + buffer.isDirect());
                 System.out.println("in read, buffer.getCapacity() = " + buffer.capacity());
                 System.out.println("in read, buffer.limit() = " + buffer.limit());
@@ -71,7 +102,7 @@ class HelloWorld {
         System.out.println("before get(key2)");
 
         final byte[] key2 = { 0, 0, 0, 0 };
-        getFromMap(map, key2, (java.nio.ByteBuffer buffer) -> {
+        rustMap.get(key2, (java.nio.ByteBuffer buffer) -> {
                 System.out.println("in read, buffer.isDirect() = " + buffer.isDirect());
                 System.out.println("in read, buffer.getCapacity() = " + buffer.capacity());
                 System.out.println("in read, buffer.limit() = " + buffer.limit());
@@ -82,11 +113,15 @@ class HelloWorld {
             }
         );
 
-        deleteFromMap(map, key);
+        rustMap.delete(key);
 
-        System.out.println("map size after delete = " + mapSize(map));
+        System.out.println("map size after delete = " + rustMap.size());
 
-        deleteMap(map);
+        rustMap.destroy();
+    }
+ 
+    public static void main(String[] args) {
+        new HelloWorld().run();
     }
 
 }
