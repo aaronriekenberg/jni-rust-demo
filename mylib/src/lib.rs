@@ -16,36 +16,36 @@ use std::{sync::mpsc, thread, time::Duration};
 
 use std::collections::HashMap;
 
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 struct Map {
-    map: HashMap<Vec<u8>, Arc<Vec<u8>>>,
+    map: Mutex<HashMap<Vec<u8>, Arc<Vec<u8>>>>,
 }
 
 impl Map {
     fn new() -> Self {
         Map {
-            map: HashMap::new(),
+            map: Mutex::new(HashMap::new()),
         }
     }
 
     fn insert(&mut self, key: Vec<u8>, value: Arc<Vec<u8>>) {
-        self.map.insert(key, value);
+        self.map.lock().unwrap().insert(key, value);
     }
 
     fn len(&self) -> usize {
-        self.map.len()
+        self.map.lock().unwrap().len()
     }
 
     fn get(&self, key: &Vec<u8>) -> Option<Arc<Vec<u8>>> {
-        return match self.map.get(key) {
+        return match self.map.lock().unwrap().get(key) {
             None => None,
             Some(value) => Some(Arc::clone(value)),
         };
     }
 
     fn remove(&mut self, key: &Vec<u8>) {
-        self.map.remove(key);
+        self.map.lock().unwrap().remove(key);
     }
 }
 
