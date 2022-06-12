@@ -18,8 +18,32 @@ use std::collections::HashMap;
 
 use std::sync::{Arc, Mutex};
 
+struct MapValue {
+    value_pointer: *mut [u8],
+}
+
+impl MapValue {
+    fn new(value_vec: Vec<u8>) -> Self {
+        let boxed_slice = value_vec.into_boxed_slice();
+        MapValue {
+            value_pointer: Box::into_raw(boxed_slice),
+        }
+    }
+
+    fn get_pointer(&self) -> *mut [u8] {
+        self.value_pointer
+    }
+}
+
+impl Drop for MapValue {
+    fn drop(&mut self) {
+        // println!("in MapValue.drop");
+        let _box = unsafe { Box::from_raw(self.value_pointer) };
+    }
+}
+
 struct Map {
-    map: Mutex<HashMap<Vec<u8>, Arc<Vec<u8>>>>,
+    map: Mutex<HashMap<Vec<u8>, Arc<MapValue>>>,
 }
 
 impl Map {
@@ -29,15 +53,18 @@ impl Map {
         }
     }
 
-    fn insert(&mut self, key: Vec<u8>, value: Arc<Vec<u8>>) {
-        self.map.lock().unwrap().insert(key, value);
+    fn insert(&mut self, key: Vec<u8>, value: Vec<u8>) {
+        self.map
+            .lock()
+            .unwrap()
+            .insert(key, Arc::new(MapValue::new(value)));
     }
 
     fn len(&self) -> usize {
         self.map.lock().unwrap().len()
     }
 
-    fn get(&self, key: &Vec<u8>) -> Option<Arc<Vec<u8>>> {
+    fn get(&self, key: &Vec<u8>) -> Option<Arc<MapValue>> {
         return match self.map.lock().unwrap().get(key) {
             None => None,
             Some(value) => Some(Arc::clone(value)),
@@ -70,7 +97,7 @@ pub extern "system" fn Java_RustMap_putIntoMap(
     let map = unsafe { &mut *(map_ptr as *mut Map) };
 
     let key = env.convert_byte_array(key_byte_array).unwrap();
-    let value = Arc::new(env.convert_byte_array(value_byte_array).unwrap());
+    let value = env.convert_byte_array(value_byte_array).unwrap();
 
     map.insert(key, value);
 }
@@ -103,10 +130,10 @@ pub extern "system" fn Java_RustMap_getFromMap(
             // it to the thread, to prevent it from being collected by the GC.
             let map_getter = env.new_global_ref(map_getter).unwrap();
 
-            let mut value_clone = (*value).clone();
+            let value_pointer = value.get_pointer();
 
             let direct_buffer = env
-                .new_direct_byte_buffer(value_clone.as_mut_slice())
+                .new_direct_byte_buffer(unsafe { &mut *value_pointer })
                 .unwrap();
 
             let _result = env.call_method(
